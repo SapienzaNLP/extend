@@ -34,5 +34,8 @@ pip install -e .
 # download spacy model
 python -m spacy download en_core_web_sm
 
+# downloading hf pretrained
+python -c 'from transformers import AutoTokenizer, AutoModel; AutoTokenizer.from_pretrained("allenai/longformer-large-4096"); AutoModel.from_pretrained("allenai/longformer-large-4096")'
+
 echo "Classy successfully installed. Don't forget to activate your environment!"
 echo "$> conda activate ${env_name}"

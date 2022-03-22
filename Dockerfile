@@ -20,10 +20,10 @@ ENV PATH=/root/miniconda3/bin:${PATH}
 RUN conda update -y conda && conda init
 
 # setup env
-WORKDIR /classy
+WORKDIR /extend
 COPY . .
 RUN \
-    bash -c "source ~/miniconda3/etc/profile.d/conda.sh && printf 'classy\n3.8\n11.1\n' | bash setup.sh"
+    bash -c "source ~/miniconda3/etc/profile.d/conda.sh && printf 'extend\n3.8\n11.1\n' | bash setup.sh"
 
 # standard cmd
 CMD "./demo.sh"

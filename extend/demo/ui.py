@@ -29,7 +29,7 @@ def main(
         """
             <style type="text/css">
                 a {
-                    text-decoration: none;
+                    text-decoration: none !important;
                 }
             </style>
         """,
@@ -37,7 +37,10 @@ def main(
     )
 
     # setup header
-    st.markdown("<h1 style='text-align: center;'>ExtEnD: Extractive Entity Disambiguation</h1>", unsafe_allow_html=True)
+    st.markdown(
+        "<h1 style='text-align: center;'>ExtEnD: Extractive Entity Disambiguation</h1>",
+        unsafe_allow_html=True,
+    )
     st.write(
         """
             <div align="center">
@@ -53,7 +56,6 @@ def main(
     )
 
     def model_demo():
-
         @st.cache(allow_output_mutation=True)
         def load_resources(inventory_path):
 
@@ -84,7 +86,9 @@ def main(
         # custom inventory
         uploaded_inventory_path = st.file_uploader(
             "[Optional] Upload custom inventory (tsv file, mention \\t desc1 \\t desc2 \\t)",
-            accept_multiple_files=False, type=["tsv"])
+            accept_multiple_files=False,
+            type=["tsv"],
+        )
         if uploaded_inventory_path is not None:
             inventory_path = f"data/inventories/{uploaded_inventory_path.name}"
             with open(inventory_path, "wb") as f:
@@ -96,7 +100,7 @@ def main(
         nlp = load_resources(inventory_path)
         color_generator = get_md_200_random_color_generator()
 
-        if st.button("Classify", key="classify"):
+        if st.button("Disambiguate", key="classify"):
 
             # tag sentence
             time_start = time.perf_counter()
@@ -150,8 +154,11 @@ def main(
 
     def hiw():
         st.markdown("ExtEnD frames Entity Disambiguation as a text extraction problem:")
-        st.image("data/repo-assets/extend_formulation.png", caption="ExtEnD Formulation")
-        st.markdown("""            
+        st.image(
+            "data/repo-assets/extend_formulation.png", caption="ExtEnD Formulation"
+        )
+        st.markdown(
+            """            
             Given the sentence *After a long fight Superman saved Metropolis*, where *Superman* is the mention
             to disambiguate, ExtEnD first concatenates the descriptions of all the possible candidates of *Superman* in the
             inventory and then selects the span whose description best suits the mention in its context.
@@ -159,16 +166,23 @@ def main(
             To convert this task to end2end entity linking, as we do in *Model demo*, we leverage spaCy 
             (more specifically, its NER) and run ExtEnD on each named entity spaCy identifies 
             (if the corresponding mention is contained in the inventory).
-        """)
+        """
+        )
 
     def abstract():
         st.write(
             """
-            Word Sense Disambiguation (WSD) is a historical NLP task aimed at linking words in contexts to discrete sense inventories and it is usually cast as a multi-label classification task. Recently, several neural approaches have employed sense definitions to better represent word meanings. Yet, these approaches do not observe the input sentence and the sense definition candidates all at once, thus potentially reducing the model performance and generalization power. We cope with this issue by reframing WSD as a span extraction problem --- which we called Extractive Sense Comprehension (ESC) --- and propose ESCHER, a transformer-based neural architecture for this new formulation. By means of an extensive array of experiments, we show that ESC unleashes the full potential of our model, leading it to outdo all of its competitors and to set a new state of the art on the English WSD task. In the few-shot scenario, ESCHER proves to exploit training data efficiently, attaining the same performance as its closest competitor while relying on almost three times fewer annotations. Furthermore, ESCHER can nimbly combine data annotated with senses from different lexical resources, achieving performances that were previously out of everyone's reach. The model along with data is available at https://github.com/SapienzaNLP/esc.
+            Local models for Entity Disambiguation (ED) have today become extremely powerful, in most part thanks to the advent of large pre-trained language models. However, despite their significant performance achievements, most of these approaches frame ED through classification formulations that have intrinsic limitations, both computationally and from a modeling perspective. In contrast with this trend, here we propose EXTEND, a novel local formulation for ED where we frame this task as a text extraction problem, and present two Transformer-based architectures that implement it. Based on experiments in and out of domain, and training over two different data regimes, we find our approach surpasses all its competitors in terms of both data efficiency and raw performance. EXTEND outperforms its alternatives by as few as 6 F 1 points on the more constrained of the two data regimes and, when moving to the other higher-resourced regime, sets a new state of the art on 4 out of 6 benchmarks under consideration, with average improvements of 0.7 F 1 points overall and 1.1 F 1 points out of domain. In addition, to gain better insights from our results, we also perform a fine-grained evaluation of our performances on different classes of label frequency, along with an ablation study of our architectural choices and an error analysis. We release our code and models for research purposes at https:// github.com/SapienzaNLP/extend.
+            
+            Link to full paper: https://www.researchgate.net/publication/359392427_ExtEnD_Extractive_Entity_Disambiguation 
         """
         )
 
-    tabs = dict(model=("Model demo", model_demo), hiw=("How it works", hiw), abstract=("Abstract", abstract))
+    tabs = dict(
+        model=("Model demo", model_demo),
+        hiw=("How it works", hiw),
+        abstract=("Abstract", abstract),
+    )
 
     tabbed_navigation(tabs, "model")
 

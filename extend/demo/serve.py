@@ -63,16 +63,17 @@ def main(
             _disambiguated_entities = []
             for _ent in _doc.ents:
                 if _ent._.disambiguated_entity is not None:
-                    _disambiguated_entities.append(DisambiguatedEntity(
-                        char_start=_ent.start_char,
-                        char_end=_ent.end_char,
-                        mention=_ent.text,
-                        entity=_ent._.disambiguated_entity,
-                    ))
-            outputs.append(Output(
-                text=_input,
-                disambiguated_entities=_disambiguated_entities
-            ))
+                    _disambiguated_entities.append(
+                        DisambiguatedEntity(
+                            char_start=_ent.start_char,
+                            char_end=_ent.end_char,
+                            mention=_ent.text,
+                            entity=_ent._.disambiguated_entity,
+                        )
+                    )
+            outputs.append(
+                Output(text=_input, disambiguated_entities=_disambiguated_entities)
+            )
 
         return outputs
 
