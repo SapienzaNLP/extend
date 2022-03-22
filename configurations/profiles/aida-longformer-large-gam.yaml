@@ -1,0 +1,125 @@
+hydra:
+  verbose:
+    - classy
+    - src
+
+supported_tasks:
+  - qa
+
+# global params
+transformer_model: allenai/longformer-large-4096
+candidates_separator: "*"
+callbacks_monitor: "validation_f1"
+callbacks_mode: "max"
+
+# trainer
+training:
+
+  # reproducibility
+  seed: 12
+
+  # pl_trainer
+  pl_trainer:
+    _target_: pytorch_lightning.Trainer
+    accumulate_grad_batches: 8
+    gradient_clip_val: 10.0
+    val_check_interval: 2048
+    max_steps: 1_000_000
+
+  # early stopping callback
+  early_stopping_callback:
+    _target_: pytorch_lightning.callbacks.EarlyStopping
+    monitor: ${callbacks_monitor}
+    mode: ${callbacks_mode}
+    patience: 25
+
+  # model_checkpoint_callback
+  model_checkpoint_callback:
+    _target_: classy.pl_callbacks.best_checkpoint.ModelCheckpointWithBest
+    monitor: ${callbacks_monitor}
+    mode: ${callbacks_mode}
+    verbose: True
+    save_top_k: 2
+    dirpath: checkpoints
+    save_last: true
+
+
+# MODEL PARAMS
+model:
+  _target_: extend.esc_ed_module.ESCModule
+  additional_special_tokens: []
+  transformer_model: ${transformer_model}
+  attention_window: 64
+  modify_global_attention: 2
+  optim_conf:
+    _target_: classy.optim.factories.RAdamFactory
+    lr: 1e-5
+    weight_decay: 0.01
+    no_decay_params:
+      - bias
+      - LayerNorm.weight
+
+data:
+  datamodule:
+    train_dataset:
+      _target_: 'extend.data.esc_ed_dataset.ESCEDDataset.from_file'
+      transformer_model: ${transformer_model}
+      additional_special_tokens: ${model.additional_special_tokens}
+      candidates_separator: ${candidates_separator}
+      shuffle_candidates_prob: 0.0
+      min_length: 0
+      max_length: 1024
+      tokens_per_batch: 1024
+      max_batch_size: 1000
+      section_size: 20_000
+      prebatch: True
+      materialize: False
+      for_inference: False
+    validation_dataset:
+      _target_: 'extend.data.esc_ed_dataset.ESCEDDataset.from_file'
+      transformer_model: ${transformer_model}
+      additional_special_tokens: ${model.additional_special_tokens}
+      candidates_separator: ${candidates_separator}
+      min_length: 0
+      max_length: 1024
+      tokens_per_batch: 2048
+      max_batch_size: 10
+      section_size: 10000
+      prebatch: True
+      materialize: True
+      for_inference: False
+    shuffle_dataset: True
+
+prediction:
+  dataset:
+    _target_: 'extend.data.esc_ed_dataset.ESCEDDataset.from_samples'
+    transformer_model: ${transformer_model}
+    additional_special_tokens: ${model.additional_special_tokens}
+    candidates_separator: ${candidates_separator}
+    min_length: -1
+    max_length: -1
+    tokens_per_batch: 4096
+    max_batch_size: -1
+    section_size: 10000
+    prebatch: True
+    materialize: False
+    for_inference: True
+
+callbacks:
+  - _target_: "classy.pl_callbacks.prediction.PredictionPLCallback"
+    path: null
+    prediction_dataset_conf: ${prediction.dataset}
+    settings:
+      - name: "validation"
+        path: null
+        token_batch_size: 4096
+        limit: -1
+    on_result:
+      file_dumper:
+        _target_: "classy.pl_callbacks.prediction.FileDumperPredictionCallback"
+      evaluation:
+        _target_: "classy.pl_callbacks.prediction.EvaluationPredictionCallback"
+        evaluation: ${evaluation}
+
+evaluation:
+  _target_: "extend.evaluation.InKBF1"

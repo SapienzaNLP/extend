@@ -1,0 +1,9 @@
+torchmetrics==0.5.1
+classy-core==0.2.1
+spacy==3.2.3
+# demo ui
+streamlit==1.4.0
+st-annotated-text==2.0.0
+# demo serve
+fastapi==0.68.1
+uvicorn[standard]==0.15.0
