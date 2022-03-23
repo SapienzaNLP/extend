@@ -1,7 +1,7 @@
 torchmetrics==0.5.1
 classy-core==0.2.1
 spacy==3.2.3
-https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.2.0/en_core_web_sm-3.2.0.tar.gz#egg=en_core_web_sm
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.2.0/en_core_web_sm-3.2.0-py3-none-any.whl
 # demo ui
 streamlit==1.2.0
 st-annotated-text==2.0.0
