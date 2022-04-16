@@ -96,4 +96,9 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-    main(args.model_path, "data/inventories/aida.tsv", cuda_device=-1, port=args.p)
+    main(
+        args.model_path,
+        "data/inventories/le-and-titov-2018-inventory.min-count-2.sqlite3",
+        cuda_device=-1,
+        port=args.p,
+    )

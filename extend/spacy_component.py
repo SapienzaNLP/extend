@@ -1,4 +1,6 @@
-from typing import List
+import pickle
+import shelve
+from typing import List, Dict, Optional, Set
 
 import spacy
 import torch
@@ -13,6 +15,7 @@ from spacy import Language
 from spacy.tokens import Doc, Span
 
 from extend.data.data_drivers import build_context
+from extend.utils.sqlite3_mentions_inventory import Sqlite3BackedMentionsInventory
 
 
 def load_checkpoint(checkpoint_path: str, device: int) -> ClassyPLModule:
@@ -23,12 +26,17 @@ def load_checkpoint(checkpoint_path: str, device: int) -> ClassyPLModule:
     return model
 
 
-def load_mentions_inventory(mentions_inventory_path: str):
-    inventory_stores = dict()
-    with open(mentions_inventory_path) as f:
-        for line in f:
-            mention, *candidates = line.strip().split("\t")
-            inventory_stores[mention] = candidates
+def load_mentions_inventory(mentions_inventory_path: str) -> Dict:
+    if mentions_inventory_path.endswith(".tsv"):
+        inventory_stores = dict()
+        with open(mentions_inventory_path) as f:
+            for line in f:
+                mention, *candidates = line.strip().split("\t")
+                inventory_stores[mention] = candidates
+    elif mentions_inventory_path.endswith(".sqlite3"):
+        inventory_stores = Sqlite3BackedMentionsInventory.from_path(
+            mentions_inventory_path
+        )
     return inventory_stores
 
 
@@ -50,6 +58,20 @@ def annotate_doc(annotated_samples: List[QASample]):
     },
 )
 class ExtendComponent:
+    DEFAULT_ENTITY_WHITELIST = {
+        "EVENT",
+        "FAC",
+        "GPE",
+        "LANGUAGE",
+        "LOC",
+        "MONEY",
+        "NORP",
+        "ORG",
+        "PERSON",
+        "PRODUCT",
+        "WORK_OF_ART",
+    }
+
     def __init__(
         self,
         nlp,
@@ -58,6 +80,7 @@ class ExtendComponent:
         mentions_inventory_path: str,
         tokens_per_batch: int,
         device: int,
+        entity_whitelist: Optional[Set[str]] = None,
     ):
         assert checkpoint_path is not None and mentions_inventory_path is not None, ""
         self.model = load_checkpoint(checkpoint_path, device)
@@ -66,13 +89,17 @@ class ExtendComponent:
         )
         self.token_batch_size = tokens_per_batch
         self.mentions_inventory = load_mentions_inventory(mentions_inventory_path)
+        self.entity_whitelist = entity_whitelist or self.DEFAULT_ENTITY_WHITELIST
 
     def _samples_from_doc(self, doc: Doc) -> List[QASample]:
         samples = []
         doc_tokens = [token.text for token in doc]
         for named_entity in doc.ents:
-            if named_entity.lemma_ in self.mentions_inventory:
-                candidates = self.mentions_inventory.get(named_entity.lemma_)
+            if (
+                named_entity.label_ in self.entity_whitelist
+                and named_entity.lemma_ in self.mentions_inventory
+            ):
+                candidates = self.mentions_inventory[named_entity.lemma_]
                 context, _, _ = build_context(candidates, answer=None)
                 left_tokens = doc_tokens[: named_entity.start]
                 right_tokens = doc_tokens[named_entity.end :]

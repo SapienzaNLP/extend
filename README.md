@@ -204,15 +204,29 @@ disambiguated_entities = [(ent.text, ent._.disambiguated_entity) for ent in doc.
 Where: 
 * `<ckpt-path>` is the path to a pretrained checkpoint of extend that
 you can find in the [Checkpoints section](#checkpoints), and
-* `<inventory-path>` is the path to a simple tsv file containing the possible Wikipedia page titles for a number of mentions:
+* `<inventory-path>` is the path to a file containing the mapping from mentions to the corresponding candidates.
+
+We support two formats for `<inventory-path>`:
+* **tsv**:
   ```bash
   $ head -1 <inventory-path>
   Rome \[TAB\] Rome City \[TAB\] Rome Football Team \[TAB\] Roman Empire \[TAB\] ...
   ``` 
-  [Here](https://drive.google.com/file/d/14ogTggmOQEPCGyySRNhxzqzhNHhDteXe/view?usp=sharing) 
-you can download our inventory pre-computed from the AIDA dataset (we recommend creating a folder *data/inventories/*
-and placing the file there inside, e.g., *<inventory-path> = data/inventories/aida.tsv*), but note that you can also 
-create and use your own inventory!
+  That is, `<inventory-path>` is a tab-separated file where, for each row, we have the mention (*Rome*) followed by its possible entities.
+* **sqlite**: a sqlite3 database with a *candidate* table with two columns:
+  * *mention* (text PRIMARY KEY)
+  * *entities* (text). This must be a tab-separated list of the corresponding entities.
+
+We release 6 possible pre-computed `<inventory-path>` that you could use (we recommend creating a folder *data/inventories/*
+and placing the files downloaded there inside, e.g., *<inventory-path> = data/inventories/le-and-titov-2018-inventory.min-count-2.sqlite3*):
+|                                              Inventory                                              |  Number of Mentions  | Source |
+|:-----------------------------------------------------------------------------------------------:|:--:|:------------:|
+| [le-and-titov-2018-inventory.min-count-2.tsv](https://drive.google.com/file/d/15Xgv3EuuKg8TsOml42TtHkBHDF5im022/view?usp=sharing) | 12090972 |    Cleaned version of the candidate set released by [Le and Titov (2018)](https://aclanthology.org/P18-1148/). We discard mentions whose count is less than 2.     |
+| [**Recommended**] [le-and-titov-2018-inventory.min-count-2.sqlite3](https://drive.google.com/file/d/1YIb55cIM2D3fIc1OHA5kYN_vEsaRQOsO/view?usp=sharing) | 12090972 |    Cleaned version of the candidate set released by [Le and Titov (2018)](https://aclanthology.org/P18-1148/). We discard mentions whose count is less than 2.     |
+| [le-and-titov-2018-inventory.tsv](https://drive.google.com/file/d/19ycTznwIt40s6pdwzjdOZEhV5oA8uRlN/view?usp=sharing) | 21571265 |    The candidate set released by [Le and Titov (2018)](https://aclanthology.org/P18-1148/)     |
+| [le-and-titov-2018-inventory.sqlite3](https://drive.google.com/file/d/1ksbomzYc0un4XQeb-BU1BYvVV1NqK_Nv/view?usp=sharing) | 21571265 |    The candidate set released by [Le and Titov (2018)](https://aclanthology.org/P18-1148/)     |
+
+Note that, as far as you respect either of these two formats, you can also create and use your own inventory!
 
 ## Acknowledgments
 

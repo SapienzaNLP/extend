@@ -6,19 +6,19 @@ def main():
     nlp = spacy.load("en_core_web_sm")
     extend_config = dict(
         checkpoint_path="experiments/extend-longformer-large/2021-10-22/09-11-39/checkpoints/best.ckpt",
-        mentions_inventory_path="data/inventories/aida.tsv",
+        mentions_inventory_path="data/inventories/le-and-titov-2018-inventory.min-count-2.sqlite3",
         device=0,
         tokens_per_batch=10_000,
     )
     nlp.add_pipe("extend", after="ner", config=extend_config)
 
-    input_sentence = "England game after five years out of the national team Cuttitta announced his retirement after the 1995 World Cup ."
+    input_sentence = "Japan began the defence of their title with a lucky 2-1 win against Syria in a championship match on Friday."
 
     doc = nlp(input_sentence)
     for ent in doc.ents:
         if ent._.disambiguated_entity is not None:
             print(
-                f"Mention: {ent.text} | Wikipedia Page Title: {ent._.disambiguated_entity}"
+                f"Mention: {ent.text} | Entity type: {ent.label_} | Wikipedia Page Title: {ent._.disambiguated_entity}"
             )
 
 
