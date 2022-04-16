@@ -26,7 +26,7 @@ this task as a text extraction problem. This work was accepted at ACL 2022.
 If you find our paper, code or framework useful, please reference this work in your paper:
 
 ```
-@inproceedings{barba-etal-2021-consec,
+@inproceedings{barba-etal-2021-extend,
     title = "{E}xt{E}n{D}: Extractive Entity Disambiguation",
     author = "Barba, Edoardo  and
       Procopio, Luigi  and
@@ -190,10 +190,9 @@ extend_config = dict(
 
 nlp.add_pipe("extend", after="ner", config=extend_config)
 
-input_sentence = "England game after five years " \
-                 "out of the national team Cuttitta " \
-                 "announced his retirement after the " \
-                 "1995 World Cup ."
+input_sentence = "Japan began the defence of their title " \
+                 "with a lucky 2-1 win against Syria " \
+                 "in a championship match on Friday."
 
 doc = nlp(input_sentence)
 
