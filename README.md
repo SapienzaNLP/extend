@@ -46,9 +46,10 @@ ExtEnD is built on top of the [classy](https://sunglasses-ai.github.io/classy) l
 this project, we recommend checking first [its introduction](https://sunglasses-ai.github.io/classy/docs/intro/), although
 it is not strictly required to train and use the models.
 
-Finally, we also developed a very simple [custom component](#spacy) for [spaCy](https://spacy.io/) that makes it simple
-to use and test ExtEnD models.
-
+Finally, we also developed a few additional tools that make it simple to use and test ExtEnD models:
+* a very simple [custom component](#spacy) for [spaCy](https://spacy.io/)
+* a [demo](https://huggingface.co/spaces/poccio/ExtEnD) on HuggingFace Spaces
+* a [docker image](#docker-container) running two services, a streamlit demo and a REST service
 
 ## Setup the environment
 
@@ -196,7 +197,7 @@ input_sentence = "Japan began the defence of their title " \
 
 doc = nlp(input_sentence)
 
-# [(England, England national football team), (Cuttitta, Marcello Cuttitta), (World Cup, FIFA World Cup)]
+# [(Japan, Japan National Footbal Team), (Syria, Syria National Footbal Team)]
 disambiguated_entities = [(ent.text, ent._.disambiguated_entity) for ent in doc.ents]
 ```
 
@@ -227,6 +228,22 @@ and placing the files downloaded there inside, e.g., *<inventory-path> = data/in
 
 Note that, as far as you respect either of these two formats, you can also create and use your own inventory!
 
+## Docker container
+ 
+Finally, we also release a [docker image](https://hub.docker.com/repository/docker/poccio/extend) running two services, a streamlit demo and a REST service:
+```bash
+$ docker run -p 22001:22001 -p 22002:22002 --rm -itd poccio/extend:1.0.1
+<container id>
+```
+ 
+ Now you can:
+ * checkout the streamlit demo at http://127.0.0.1:22001/
+ * invoke the REST service running at http://127.0.0.1:22002/ (http://127.0.0.1:22002/docs you can find the OpenAPI documentation):
+   ```bash
+   $ curl -X POST http://127.0.0.1:22002/ -H 'Content-Type: application/json' -d '[{"text": "Rome is in Italy"}]'
+   [{"text":"Rome is in Italy","disambiguated_entities":[{"char_start":0,"char_end":4,"mention":"Rome","entity":"Rome"},{"char_start":11,"char_end":16,"mention":"Italy","entity":"Italy"}]}]
+   ```
+ 
 ## Acknowledgments
 
 The authors gratefully acknowledge the support of the ERC Consolidator Grant [MOUSSE](http://mousse-project.org) No. 726487 under the European Union’s Horizon 2020 research and innovation programme.
